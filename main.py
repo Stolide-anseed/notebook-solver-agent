@@ -1,7 +1,7 @@
-from src.ingestion.load_document import extract_text_from_pdf
-from src.preprocessing.clean_text import preprocess_text
+from src.preprocessing import preprocess_text
+from src.ingestion import extract_text_from_pdf
 
-raw_text = extract_text_from_pdf("data/sample.pdf")
+raw_text = extract_text_from_pdf("data/raw/3_BASIC_ML.pdf")
 clean_text = preprocess_text(raw_text)
 
-print(clean_text[:1000])
+print(clean_text)
