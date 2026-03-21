@@ -1,15 +1,14 @@
 def splitter_text(text):
     t_q = {
-    'theory':[],
     'question':[]
     }
-    i = 'theory'
+    quest_o_n = ''
     for indent in text.splitlines():
-        if indent != '':
             if indent.split()[-1] == 'задание':
-                i = 'question'
-            if indent.split()[-1] == 'ответ:' and len(t_q['question']) != 0:
-                break
-            t_q[i].append(indent)
-
-    return  t_q
+                quest_o_n = 'question'
+            if indent.split()[-1] == 'ответ:':
+                quest_o_n = ''
+            if quest_o_n != '':
+                t_q[quest_o_n].append(indent)
+    question_text = "\n".join(t_q.get("question", [])).strip()
+    return  question_text
