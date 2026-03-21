@@ -1,10 +1,12 @@
+import re
+
 def splitter_text(text):
     t_q = {
     'question':[]
     }
     quest_o_n = ''
     for indent in text.splitlines():
-            if indent.split()[-1] == 'задание':
+            if bool(re.search(r"\bзадание\b", indent, flags=re.IGNORECASE)):
                 quest_o_n = 'question'
             if indent.split()[-1] == 'ответ:':
                 quest_o_n = ''
