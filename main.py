@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
+from tools import search_tool
 
 from src.generetor_promt import generator, parser
 from src.ingestion import extract_text_from_pdf
@@ -37,7 +38,7 @@ def _extract_text_from_content(content) -> str:
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    api_key='Твой API ключ'
+    api_key='Твой ключ API'
 )
 
 raw_text = extract_text_from_pdf("data/raw/3_BASIC_ML.pdf")
@@ -45,8 +46,11 @@ clean_text = preprocess_text(raw_text).lower()
 question = splitter_text(clean_text)
 
 
+tools = [search_tool]
 system_prompt = generator()
-agent = create_agent(model=llm)
+agent = create_agent(model=llm,
+                     system_prompt=system_prompt,
+                     tools=tools)
 
 raw_response = agent.invoke(
     {
@@ -67,7 +71,24 @@ text = _extract_text_from_content(raw_response["messages"][-1].content)
 structured_response = parser.parse(text)
 for item in structured_response.results:
     if item.status == 'ask_user':
-        ...
+        user_answer = input(f"{item.question_for_user}\n> ")
+        raw_response = agent.invoke(
+            {
+                "messages": [
+                    SystemMessage(content=system_prompt),
+                    HumanMessage(
+                        content=(
+                            "Вот исходное задание:\n"
+                            f"{question}\n\n"
+                            "Вот уточнение от пользователя:\n"
+                            f"{user_answer}\n\n"
+                            "Теперь реши задачу и верни ответ строго по JSON-схеме."
+                        )
+                    ),
+                ]
+            }
+        )
+
     output_dir = Path("data/answer")
     output_dir.mkdir(parents=True, exist_ok=True)
     with open(output_dir / "result.json", "a", encoding="utf-8") as f:
